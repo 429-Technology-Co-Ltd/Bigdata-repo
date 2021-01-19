@@ -8,6 +8,6 @@ package qm.qiaomeng.entry
  */
 object Entry {
   def main(args: Array[String]): Unit = {
-
+    //flink程序的入口
   }
 }
