@@ -1,13 +1,15 @@
 package qm.qiaomeng.entry
 
+import qm.qiaomeng.flink.FlinkEntry
+
 /**
  * @ClassName: Entry
- * @Description: TODO
+ * @Description: 流入口
  * @Create by: LinYoung
- * @Date: 2021/1/19 18:01
+ * @Date: 2020/12/24 12:31
  */
 object Entry {
   def main(args: Array[String]): Unit = {
-    //flink程序的入口
+    FlinkEntry.entry()
   }
 }
