@@ -1,6 +1,7 @@
 package qm.qiaomeng.flink
 
 import org.elasticsearch.search.SearchHit
+import qm.qiaomeng.es.ESUtil
 
 import scala.collection.mutable.ArrayBuffer
 

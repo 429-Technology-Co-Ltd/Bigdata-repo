@@ -23,7 +23,7 @@ object KafkaConsumer {
     properties.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, "1000")
     properties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true")
 
-    val topic = "goods"
+    val topic = "app"
     new FlinkKafkaConsumer[String](topic, new SimpleStringSchema(), properties)
   }
 }

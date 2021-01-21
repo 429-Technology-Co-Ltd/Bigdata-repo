@@ -20,10 +20,10 @@ object FlinkEntry {
     val consumer: FlinkKafkaConsumer[String] = KafkaConsumer.getConsumer
 
     //从头开始消费
-    consumer.setStartFromEarliest()
+//    consumer.setStartFromEarliest()
 
     //添加源并设置并行度
-    val ds: DataStream[String] = env.addSource(consumer).setParallelism(4)
+    val ds: DataStream[String] = env.addSource(consumer)
 
     // 处理入口
     ds.map(x => {
@@ -34,7 +34,9 @@ object FlinkEntry {
       results
     })
       .map(x => (x._1._1, x._1._2, x._2))
+      .executeAndCollect()
+      .foreach(println)
 
-    env.execute("Kafka-Flink-Redis")
+//    env.execute("Kafka-Flink-Redis")
   }
 }

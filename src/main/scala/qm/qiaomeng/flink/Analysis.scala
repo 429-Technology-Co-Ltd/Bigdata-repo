@@ -2,6 +2,9 @@ package qm.qiaomeng.flink
 
 import java.util
 
+import qm.qiaomeng.jackson.Jackson
+import qm.qiaomeng.redis.RedisUtils
+
 import scala.collection.mutable.ArrayBuffer
 
 /**
@@ -20,7 +23,8 @@ object Analysis {
   def analysis(x: String): ((String, String, String), Double) = {
 
     //切分字符串
-    val goodsInfo = x.split("-")
+    //一开始选择“-”做分割符，但是数据中会出现“-” 所以选择了一个比较长的分割符
+    val goodsInfo = x.split("#QM#MQ#")
     //要处理的商品信息
     val head = goodsInfo(0)
     val tail = goodsInfo(1)
@@ -33,28 +37,28 @@ object Analysis {
     Jackson.autoParseJson(tail, tailMap)
 
     //判空处理
-    if (headMap.isEmpty ) {
+    if (headMap.isEmpty) {
       return (("", "头部为空！", ""), 0.0)
     }
     if (tailMap.isEmpty) {
       return (("", "尾部为空！", ""), 0.0)
     }
 
-    var key = headMap.getOrDefault("key", null)
-    if (key == null) {
+    var key = headMap.getOrDefault("userid", "").toString
+    if (key.isEmpty) {
       return (("", "没有用户id！", ""), 0.0)
     }
 
-    val title = tailMap.getOrDefault("title", null)
+    val title = tailMap.getOrDefault("title", "").toString
 
     //json对象为空，转成json对象失败，接收的json字符串格式不对
-    if (title == null) {
+    if (title.isEmpty) {
       return (("", "没有标题字段！", ""), 0.0)
     }
 
     //搜索工具搜索
     val result = SearchUtils.search(title)
-    var itemStr: String = null
+    var itemStr: String = ""
 
     val itemArray: ArrayBuffer[((String, String, String), Double)] = new ArrayBuffer[((String, String, String), Double)]()
     // 对结果进行处理
@@ -69,18 +73,18 @@ object Analysis {
       }
 
       // 取出值
-      val itemInfo = resultMap.getOrDefault("item_information", null).toString
+      val itemInfo = resultMap.getOrDefault("item_information", "").toString
       itemStr = itemInfo.replaceAll("\\\\", "")
       val price = java.lang.Double.valueOf(resultMap.getOrDefault("price", 0.0).toString)
-      val source = resultMap.getOrDefault("source", null).toString
-      val title = resultMap.getOrDefault("item_name", null).toString
+      val source = resultMap.getOrDefault("source", "").toString
+      val title = resultMap.getOrDefault("item_name", "").toString
       itemArray.append(((source, title, itemStr), price))
     }
     //取最低价
     val lowPrice: ((String, String, String), Double) = itemArray.minBy(_._2)
 
-    // lintodo : 存入redis
-    //   RedisUtils.writeToRedis(key, lowPrice._1._3)
+    //存入redis
+    RedisUtils.writeToRedis(key, lowPrice._1._3)
 
     lowPrice
   }
