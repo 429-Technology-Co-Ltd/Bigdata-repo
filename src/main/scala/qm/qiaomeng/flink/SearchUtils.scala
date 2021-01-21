@@ -19,7 +19,7 @@ object SearchUtils {
    * @param text 搜索关键字
    * @return 结果数组
    */
-  def search(text: Any): Array[String] = {
+  def searchLowPrice(text: Any): Array[String] = {
     val result = new ArrayBuffer[String]()
 
     // 搜索三个平台的同一件商品
