@@ -1,8 +1,5 @@
 package qm.qiaomeng.es
 
-import java.io.IOException
-import java.util.concurrent.TimeUnit
-
 import com.alibaba.fastjson.JSONObject
 import org.elasticsearch.action.bulk.BulkRequest
 import org.elasticsearch.action.delete.DeleteRequest
@@ -19,6 +16,9 @@ import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder
 import org.elasticsearch.search.sort.SortOrder
 import org.elasticsearch.search.{SearchHit, SearchHits}
 
+import java.io.IOException
+import java.util.concurrent.TimeUnit
+
 
 /**
  * @ClassName: ESUtil
@@ -27,7 +27,7 @@ import org.elasticsearch.search.{SearchHit, SearchHits}
  * @Date: 2020/12/17 15:27
  */
 
-object ESUtil {
+object ESUtils {
 
 
   private val bulkRequest: BulkRequest = new BulkRequest
@@ -60,8 +60,6 @@ object ESUtil {
     val id = response.getId
 
     println("添加成功：" + index + id)
-
-    ESClient.closeClient()
   }
 
   //删
@@ -104,7 +102,6 @@ object ESUtil {
     } catch {
       case e: Exception => e.printStackTrace()
     }
-    ESClient.closeClient()
     exits
   }
 
@@ -132,7 +129,6 @@ object ESUtil {
     } catch {
       case e: IOException => e.printStackTrace()
     }
-    ESClient.closeClient()
   }
 
   /**
@@ -243,15 +239,17 @@ object ESUtil {
 
   //复合查询
   def boolQuery(indexName: String,
-                filedName: String,
                 source: String,
                 name: String,
+                price: Double,
                 value: Any,
                 size: Int): SearchHits = {
     searchRequest = new SearchRequest(indexName)
     val boolQueryBuilder = QueryBuilders.boolQuery
       //精准查询source字段的值，filedName写‘source’，source写‘淘宝’、‘拼多多’……
-      .must(QueryBuilders.termQuery(filedName, source))
+      .must(QueryBuilders.termQuery("source", source))
+      //
+      .must(QueryBuilders.rangeQuery("price").gte(price * 0.8))
       //匹配item_name字段的值
       .should(QueryBuilders.matchQuery(name, value))
 
