@@ -20,7 +20,7 @@ object FlinkEntry {
     val consumer: FlinkKafkaConsumer[String] = KafkaConsumer.getConsumer
 
     //从头开始消费
-//    consumer.setStartFromEarliest()
+    // consumer.setStartFromEarliest()
 
     //添加源并设置并行度
     val ds: DataStream[String] = env.addSource(consumer)
@@ -28,15 +28,13 @@ object FlinkEntry {
     // 处理入口
     ds.map(x => {
       // 数据处理流程
-      val results = Analysis.analysis(x)
+      Analysis.analysis(x)
 
-      // 拼接字符串，进入后续流程 供测试使用
-      results
+      x
     })
-      .map(x => (x._1._1, x._1._2, x._2))
-      .executeAndCollect()
-      .foreach(println)
+//      .executeAndCollect()
+//      .foreach(println)
 
-//    env.execute("Kafka-Flink-Redis")
+        env.execute("PriceComparison")
   }
 }

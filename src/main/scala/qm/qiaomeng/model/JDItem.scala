@@ -1,0 +1,62 @@
+package qm.qiaomeng.model
+
+/**
+ * @ClassName: JDItem 京东的商品类
+ * @Description:
+ * @Create by: LinYoung
+ * @Date: 2021/2/13 17:38
+ */
+case class JDItem(
+                   source: String,
+                   skuId: Long,
+                   skuName: String,
+                   spuId: Long,
+                   brandName: String,
+                   brandCode: String,
+                   commentCount: Long,
+                   goodCommentRate: Double,
+                   inOrderCount30Days: Long,
+                   inOrderComm30Days: Double,
+                   owner: String,
+                   videoInfo: String,
+                   images: Array[String],
+                   deliveryType: Int,
+                   forbidTypes: String,
+                   materialUrl: String,
+                   historyPriceDay: Int,
+                   lowestCouponPrice: Double,
+                   price: Double,
+                   lowestPrice: Double,
+                   lowestPriceType: Int,
+                   cid1Name: String,
+                   cid2Name: String,
+                   cid3Name: String,
+                   cid1Id: Int,
+                   cid2Id: Int,
+                   cid3Id: Int,
+                   pingouPrice: Double,
+                   pingouTmCount: Long,
+                   pingouUrl: String,
+                   pingouStartTime: Long,
+                   pingouEndTime: Long,
+                   shopName: String,
+                   shopId: Long,
+                   shopLabel: String,
+                   shopLevel: Double,
+                   userEvaluateScore: String,
+                   commentFactorScoreRankGrade: String,
+                   logisticsLvyueScore: String,
+                   logisticsFactorScoreRankGrade: String,
+                   afterServiceScore: String,
+                   afsFactorScoreRankGrade: String,
+                   scoreRankRate: String,
+                   couponList: String,
+                   commission: Double,
+                   commissionShare: Double,
+                   couponCommission: Double,
+                   plusCommissionShare: Double,
+                   isLock: Int,
+                   startTime: Long,
+                   endTime: Long,
+                   ctime: String
+                 )

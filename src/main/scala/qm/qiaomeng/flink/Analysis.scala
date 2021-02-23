@@ -1,6 +1,7 @@
 package qm.qiaomeng.flink
 
-import qm.qiaomeng.jackson.Jackson
+import qm.qiaomeng.jackson.{Jackson, ParseJson}
+import qm.qiaomeng.model.Item
 import qm.qiaomeng.redis.RedisUtils
 
 import java.util
@@ -92,19 +93,27 @@ object Analysis {
     }
 
     //取最低价
-    val lowPrice = items.minBy(_.price)
+    val lowPrice = items.filter(_.source.nonEmpty).minBy(_.price)
 
-    //存入redis
-    RedisUtils.writeToRedis(userId, lowPrice.itemInfo, 2000L)
-
+    //判断平台
+    lowPrice.source match {
+      case "淘宝" =>
+        val item = ParseJson.parseTBJson(lowPrice.itemInfo)
+        val itemStr = Jackson.bean2String(item)
+        RedisUtils.writeToRedis(userId, itemStr, 2000L)
+      case "拼多多" =>
+        val item = ParseJson.parsePDDJson(lowPrice.itemInfo)
+        val itemStr = Jackson.bean2String(item)
+        RedisUtils.writeToRedis(userId, itemStr, 2000L)
+      case "京东" =>
+        val item = ParseJson.parseJDJson(lowPrice.itemInfo)
+        val itemStr = Jackson.bean2String(item)
+        RedisUtils.writeToRedis(userId, itemStr, 2000L)
+      case "唯品会" =>
+        val item = ParseJson.parseWPHJson(lowPrice.itemInfo)
+        val itemStr = Jackson.bean2String(item)
+        RedisUtils.writeToRedis(userId, itemStr, 2000L)
+      case _ => RedisUtils.writeToRedis(userId, "", 2000L)
+    }
   }
-
-  // 返回值
-  case class Item(
-                   title: String,
-                   source: String,
-                   price: Double,
-                   itemInfo: String
-                 )
-
 }

@@ -1,9 +1,10 @@
 package qm.qiaomeng.jackson
 
-import java.util
-
+import com.alibaba.fastjson.JSON
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.scala.DefaultScalaModule
 
+import java.util
 import scala.util.{Failure, Success, Try}
 
 /**
@@ -14,6 +15,39 @@ import scala.util.{Failure, Success, Try}
  */
 object Jackson {
   private val mapper = new ObjectMapper
+
+  mapper.registerModule(DefaultScalaModule)
+
+  /**
+   *
+   * @param value
+   * @return
+   */
+  def bean2String(value: Any): String = {
+    mapper.writeValueAsString(value)
+  }
+
+  /**
+   * 解析一级key
+   *
+   * @param line       要解析的json字符串
+   * @param resultsMap 结果map
+   * @return 返回结果
+   */
+  def autoParseJsonFirst(line: String): util.HashMap[String, Any] = {
+    val map: util.HashMap[String, Any] = new util.HashMap[String, Any]()
+    Try {
+      val node = mapper.readTree(line)
+      val keys = node.fieldNames
+      while (keys.hasNext) {
+        val key = keys.next
+        map.put(key, node.get(key))
+      }
+    } match {
+      case Success(value) => map
+      case Failure(exception) => map
+    }
+  }
 
   /**
    * 自动解析json串，递归处理json套json的字符串
@@ -60,5 +94,14 @@ object Jackson {
       //      case Failure(exception) => new util.HashMap[String, Any] //返回空map
       case Failure(exception) => resultsMap
     }
+  }
+
+  /**
+   *
+   * @param line
+   * @return
+   */
+  def string2Array(line: String): Array[AnyRef] = {
+    JSON.parseArray(line).toArray
   }
 }

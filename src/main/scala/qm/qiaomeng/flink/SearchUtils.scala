@@ -1,7 +1,7 @@
 package qm.qiaomeng.flink
 
 import org.elasticsearch.search.SearchHit
-import qm.qiaomeng.es.ESUtil
+import qm.qiaomeng.es.ESUtils
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -19,26 +19,19 @@ object SearchUtils {
    * @param text 搜索关键字
    * @return 结果数组
    */
-  def searchLowPrice(text: Any): Array[String] = {
-    val result = new ArrayBuffer[String]()
+  def searchLowPrice(text: Any, price: Double): Array[String] = {
+    val results = new ArrayBuffer[String]()
 
     // 搜索三个平台的同一件商品
-    // lintodo : 指定ES只搜索一件商品，加一个size参数
-    // lintodo : 在此处修改搜索算法
-    val tb_hits: Array[SearchHit] = ESUtil.boolQuery("goods", "source", "淘宝", "item_name", text, 1).getHits
-    val jd_hits: Array[SearchHit] = ESUtil.boolQuery("goods", "source", "京东", "item_name", text, 1).getHits
-    val wph_hits: Array[SearchHit] = ESUtil.boolQuery("goods", "source", "唯品会", "item_name", text, 1).getHits
+    val platforms: Array[String] = Array("淘宝", "京东", "唯品会", "拼多多")
 
-    // 得到每一个平台的商品信息
-    val taobao = tb_hits(0).getSourceAsString
-    val jingdong = jd_hits(0).getSourceAsString
-    val weipinghui = wph_hits(0).getSourceAsString
-
-    result += taobao
-    result += jingdong
-    result += weipinghui
-
-    result.toArray
+    for (platform <- platforms) {
+      // lintodo : 在此处修改搜索算法
+      val hits: Array[SearchHit] = ESUtils.boolQuery("goods", platform, "item_name", price, text, 1).getHits
+      if (hits.nonEmpty) {
+        results.append(hits(0).getSourceAsString)
+      }
+    }
+    results.toArray
   }
-
 }
