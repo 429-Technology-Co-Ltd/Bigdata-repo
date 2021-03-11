@@ -21,7 +21,6 @@ object FlinkEntry {
 
     //从头开始消费
     // consumer.setStartFromEarliest()
-
     //添加源并设置并行度
     val ds: DataStream[String] = env.addSource(consumer)
 
@@ -32,9 +31,6 @@ object FlinkEntry {
 
       x
     })
-//      .executeAndCollect()
-//      .foreach(println)
-
-        env.execute("PriceComparison")
+    env.execute("PriceComparison")
   }
 }

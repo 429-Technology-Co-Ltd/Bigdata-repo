@@ -1,7 +1,6 @@
 package qm.qiaomeng.flink
 
 import qm.qiaomeng.jackson.{Jackson, ParseJson}
-import qm.qiaomeng.model.Item
 import qm.qiaomeng.redis.RedisUtils
 
 import java.util
@@ -72,7 +71,7 @@ object Analysis {
   private def priceComparison(title: String, price: Double, userId: String): Unit = {
     val resultMap = new util.HashMap[String, Any]()
 
-    val items = new ArrayBuffer[Item]()
+    val items = new ArrayBuffer[(String, String, Double, String)]()
     //商品数据
     val results: Array[String] = SearchUtils.searchLowPrice(title, price)
     for (result <- results) {
@@ -84,36 +83,42 @@ object Analysis {
         return
       }
 
-      val itemInfo = resultMap.getOrDefault("item_information", "").toString.replaceAll("\\\\", "")
+      val itemInfo = resultMap.getOrDefault("item_information", "").toString
       val price = java.lang.Double.valueOf(resultMap.getOrDefault("price", 0.0).toString)
       val source = resultMap.getOrDefault("source", "").toString
       val title = resultMap.getOrDefault("item_name", "").toString
 
-      items.append(Item(title, source, price, itemInfo))
+      items.append((title, source, price, itemInfo))
     }
 
-    //取最低价
-    val lowPrice = items.filter(_.source.nonEmpty).minBy(_.price)
 
-    //判断平台
-    lowPrice.source match {
-      case "淘宝" =>
-        val item = ParseJson.parseTBJson(lowPrice.itemInfo)
-        val itemStr = Jackson.bean2String(item)
-        RedisUtils.writeToRedis(userId, itemStr, 2000L)
-      case "拼多多" =>
-        val item = ParseJson.parsePDDJson(lowPrice.itemInfo)
-        val itemStr = Jackson.bean2String(item)
-        RedisUtils.writeToRedis(userId, itemStr, 2000L)
-      case "京东" =>
-        val item = ParseJson.parseJDJson(lowPrice.itemInfo)
-        val itemStr = Jackson.bean2String(item)
-        RedisUtils.writeToRedis(userId, itemStr, 2000L)
-      case "唯品会" =>
-        val item = ParseJson.parseWPHJson(lowPrice.itemInfo)
-        val itemStr = Jackson.bean2String(item)
-        RedisUtils.writeToRedis(userId, itemStr, 2000L)
-      case _ => RedisUtils.writeToRedis(userId, "", 2000L)
+    //调试
+
+    if (items.nonEmpty) {
+      //取最低价
+      val lowPrice = items.filter(_._2.nonEmpty).minBy(_._3)
+
+      //判断平台
+      lowPrice._2 match {
+        case "淘宝" =>
+          val item = ParseJson.parseTBJson(lowPrice._4)
+          val itemStr = Jackson.bean2String(item)
+          RedisUtils.writeToRedis(userId, itemStr, 2000L)
+        case "拼多多" =>
+          val item = ParseJson.parsePDDJson(lowPrice._4)
+          val itemStr = Jackson.bean2String(item)
+          RedisUtils.writeToRedis(userId, itemStr, 2000L)
+        case "京东" =>
+          val item = ParseJson.parseJDJson(lowPrice._4)
+          val itemStr = Jackson.bean2String(item)
+          RedisUtils.writeToRedis(userId, itemStr, 2000L)
+        case "唯品会" =>
+          val item = ParseJson.parseWPHJson(lowPrice._4)
+          val itemStr = Jackson.bean2String(item)
+          RedisUtils.writeToRedis(userId, itemStr, 2000L)
+        case _ => RedisUtils.writeToRedis(userId, "", 2000L)
+      }
+      //      RedisUtils.writeToRedis(userId, Jackson.bean2String(lowPrice), 2000L)
     }
   }
 }
